@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Reselling</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 650px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2e7d32;
+            margin-bottom: 5px;
+        }
+        .tagline {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin: 12px 0;
+            text-align: left;
+        }
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"], input[type="number"], select, textarea, input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            height: 60px;
+        }
+        button {
+            background-color: #25d366;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #128c7e;
+        }
+        #status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        .media-gallery {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .product-card {
+            width: 200px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+            text-align: left;
+            user-select: none;
+            -webkit-user-select: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .product-img-container {
+            position: relative;
+            width: 100%;
+            height: 160px;
+        }
+        .media-item {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .discount-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background-color: #d32f2f;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 6px;
+            border-radius: 3px;
+        }
+        .product-info {
+            padding: 10px;
+            flex-grow: 1;
+        }
+        .product-price {
+            font-size: 15px;
+            color: #d32f2f;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+        }
+        .product-address {
+            font-size: 12px;
+            color: #0277bd;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+        }
+        .product-desc {
+            font-size: 11px;
+            color: #555;
+            margin: 0;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .whatsapp-btn {
+            display: block;
+            background-color: #25d366;
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+            border-top: 1px solid #ddd;
+        }
+        .whatsapp-btn:hover {
+            background-color: #128c7e;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 5px;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .instructions {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+        #loading-text {
+            margin: 15px 0;
+            color: #666;
+            font-size: 14px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Local Reselling</h2>
+        <p class="tagline">Apne local area mein products kharidein aur bechein</p>
+        
+        <div class="form-group">
+            <label>Product Photo:</label>
+            <input type="file" id="imageFile" accept="image/*">
+        </div>
+        <div class="form-group">
+            <label>Price (₹):</label>
+            <input type="number" id="productPrice" placeholder="Jaise: 499">
+        </div>
+        <div class="form-group">
+            <label>Local Short Address (Area / Location):</label>
+            <input type="text" id="productAddress" placeholder="Jaise: Main Market, Patna / Civil Lines">
+        </div>
+        <div class="form-group">
+            <label>Discount Option:</label>
+            <select id="productDiscount">
+                <option value="">Koi Discount Nahi</option>
+                <option value="10% OFF">10% Off</option>
+                <option value="20% OFF">20% Off</option>
+                <option value="30% OFF">30% Off</option>
+                <option value="40% OFF">40% Off</option>
+                <option value="50% OFF">50% Off</option>
+                <option value="60% OFF">60% Off</option>
+                <option value="70% OFF">70% Off</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Description:</label>
+            <textarea id="productDesc" placeholder="Product ki details (Condition, size, etc.)..."></textarea>
+        </div>
+
+        <button onclick="compressAndUpload()">Product Upload Karein</button>
+        <p id="status"></p>
+
+        <h3>Available Local Products:</h3>
+        <p class="instructions">Photo par Tap karein: Zoom | 5 Second tak pakad kar rakhein: Delete</p>
+        <div class="media-gallery" id="mediaGallery"></div>
+        <p id="loading-text">Aur products load ho rahe hain...</p>
+    </div>
+
+    <div id="zoomModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImg">
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref as dbRef, push, get, query, orderByChild, limitToFirst, startAfter, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Aapka naya Firebase Configuration yahan set kar diya gaya hai
+        const firebaseConfig = {
+            apiKey: "AIzaSyBvfFTKBqh0E0sS5ufpejiK_ua6gixnf5s",
+            authDomain: "local-resailing.firebaseapp.com",
+            projectId: "local-resailing",
+            storageBucket: "local-resailing.firebasestorage.app",
+            messagingSenderId: "973187455126",
+            appId: "1:973187455126:web:847a608d88024595e1cab7",
+            measurementId: "G-ZKP0Q91SDE"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const SELLER_WHATSAPP = "918797221991"; // Aapka WhatsApp number
+        let lastTimestamp = null;
+        let isLoading = false;
+        let hasMore = true;
+        const PAGE_SIZE = 15;
+
+        window.compressAndUpload = function() {
+            const fileInput = document.getElementById('imageFile');
+            const priceInput = document.getElementById('productPrice').value.trim();
+            const addressInput = document.getElementById('productAddress').value.trim();
+            const discountInput = document.getElementById('productDiscount').value;
+            const descInput = document.getElementById('productDesc').value.trim();
+            const statusText = document.getElementById('status');
+
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Pehle product ki photo select karein!");
+                return;
+            }
+            if (!priceInput || !addressInput) {
+                alert("Kripya Price aur Local Address zaroor bharein!");
+                return;
+            }
+
+            statusText.innerText = "Photo compress ho rahi hai...";
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    const MAX_WIDTH = 800;
+                    const MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+
+                    statusText.innerText = "Database mein save ho raha hai...";
+
+                    const mediaListRef = dbRef(database, 'local_reselling_products');
+                    push(mediaListRef, {
+                        imageUri: compressedDataUrl,
+                        price: priceInput,
+                        address: addressInput,
+                        discount: discountInput,
+                        description: descInput,
+                        timestamp: Date.now()
+                    }).then(() => {
+                        statusText.innerText = "Product Successfully Live Ho Gaya!";
+                        fileInput.value = "";
+                        document.getElementById('productPrice').value = "";
+                        document.getElementById('productAddress').value = "";
+                        document.getElementById('productDesc').value = "";
+                        document.getElementById('productDiscount').value = "";
+                        resetGallery();
+                    }).catch((err) => {
+                        console.error("Database error:", err);
+                        statusText.innerText = "Save karne mein error aaya!";
+                    });
+                };
+            };
+        };
+
+        function loadMoreProducts() {
+            if (isLoading || !hasMore) return;
+            isLoading = true;
+            document.getElementById('loading-text').style.display = "block";
+
+            const mediaListRef = dbRef(database, 'local_reselling_products');
+            let q;
+
+            if (lastTimestamp === null) {
+                q = query(mediaListRef, orderByChild('timestamp'), limitToFirst(PAGE_SIZE));
+            } else {
+                q = query(mediaListRef, orderByChild('timestamp'), startAfter(lastTimestamp), limitToFirst(PAGE_SIZE));
+            }
+
+            get(q).then((snapshot) => {
+                document.getElementById('loading-text').style.display = "none";
+                isLoading = false;
+
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const gallery = document.getElementById('mediaGallery');
+                    const entries = Object.entries(data);
+
+                    if (entries.length < PAGE_SIZE) {
+                        hasMore = false;
+                    }
+
+                    entries.forEach(([key, item]) => {
+                        if (item.timestamp) {
+                            lastTimestamp = item.timestamp;
+                        }
+
+                        if (item.imageUri) {
+                            const card = document.createElement('div');
+                            card.className = 'product-card';
+
+                            const imgContainer = document.createElement('div');
+                            imgContainer.className = 'product-img-container';
+
+                            const img = document.createElement('img');
+                            img.src = item.imageUri;
+                            img.className = 'media-item';
+                            imgContainer.appendChild(img);
+
+                            if (item.discount) {
+                                const badge = document.createElement('div');
+                                badge.className = 'discount-badge';
+                                badge.innerText = item.discount;
+                                imgContainer.appendChild(badge);
+                            }
+
+                            card.appendChild(imgContainer);
+
+                            const infoDiv = document.createElement('div');
+                            infoDiv.className = 'product-info';
+
+                            const priceEl = document.createElement('div');
+                            priceEl.className = 'product-price';
+                            priceEl.innerText = '₹ ' + item.price;
+                            infoDiv.appendChild(priceEl);
+
+                            const addressEl = document.createElement('div');
+                            addressEl.className = 'product-address';
+                            addressEl.innerText = '📍 ' + item.address;
+                            infoDiv.appendChild(addressEl);
+
+                            if (item.description) {
+                                const descEl = document.createElement('p');
+                                descEl.className = 'product-desc';
+                                descEl.innerText = item.description;
+                                infoDiv.appendChild(descEl);
+                            }
+
+                            card.appendChild(infoDiv);
+
+                            const waText = encodeURIComponent(`Hello, mujhe is product mein interest hai jiska price ₹${item.price} aur location ${item.address} hai.`);
+                            const waLink = document.createElement('a');
+                            waLink.className = 'whatsapp-btn';
+                            waLink.href = `https://wa.me/${SELLER_WHATSAPP}?text=${waText}`;
+                            waLink.target = "_blank";
+                            waLink.innerText = "💬 WhatsApp Sampark";
+                            card.appendChild(waLink);
+
+                            let pressTimer;
+                            let isLongPress = false;
+
+                            const startPress = function() {
+                                isLongPress = false;
+                                pressTimer = setTimeout(() => {
+                                    isLongPress = true;
+                                    if (confirm("Kya aap is product ko delete karna chahte hain?")) {
+                                        deleteProduct(key);
+                                    }
+                                }, 5000);
+                            };
+
+                            const endPress = function() {
+                                clearTimeout(pressTimer);
+                                if (!isLongPress) {
+                                    const modal = document.getElementById('zoomModal');
+                                    const modalImg = document.getElementById('modalImg');
+                                    modal.style.display = "block";
+                                    modalImg.src = img.src;
+                                }
+                            };
+
+                            img.addEventListener('mousedown', startPress);
+                            img.addEventListener('mouseup', endPress);
+                            img.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+
+                            img.addEventListener('touchstart', startPress);
+                            img.addEventListener('touchend', endPress);
+
+                            gallery.appendChild(card);
+                        }
+                    });
+                } else {
+                    hasMore = false;
+                }
+            }).catch((error) => {
+                console.error("Error loading products:", error);
+                isLoading = false;
+                document.getElementById('loading-text').style.display = "none";
+            });
+        }
+
+        window.resetGallery = function() {
+            document.getElementById('mediaGallery').innerHTML = "";
+            lastTimestamp = null;
+            hasMore = true;
+            loadMoreProducts();
+        }
+
+        window.addEventListener('scroll', () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+                loadMoreProducts();
+            }
+        });
+
+        function deleteProduct(uniqueKey) {
+            const productRef = dbRef(database, 'local_reselling_products/' + uniqueKey);
+            remove(productRef).then(() => {
+                alert("Product successfully delete ho gaya!");
+                resetGallery();
+            }).catch((error) => {
+                console.error("Delete karne mein error:", error);
+                alert("Delete nahi ho payi!");
+            });
+        }
+
+        window.closeModal = function() {
+            document.getElementById('zoomModal').style.display = "none";
+        }
+
+        window.onload = function() {
+            loadMoreProducts();
+        };
+    </script>
+
+</body>
+</html>
